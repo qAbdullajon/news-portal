@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
       "thumbs.dreamstime.com",
       "example.com",
       "good-nature-blog-uploads.s3.amazonaws.com",
+      "res.cloudinary.com",
     ],
     remotePatterns: [
       {
@@ -24,6 +25,9 @@ const nextConfig: NextConfig = {
         hostname: "**.example.com",
       },
     ],
+  },
+  experimental: {
+    serverComponentsExternalPackages: ["@hookform/resolvers"],
   },
 };
 

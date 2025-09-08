@@ -1,0 +1,50 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model News {
+  id          String      @id @default(cuid())
+  slug        String      @unique
+  image       String
+  sendUrl     String?
+  titleUz     String
+  titleEn     String
+  titleRu     String
+  descriptionUz String
+  descriptionEn String
+  descriptionRu String
+  content     ContentBlock[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  published   Boolean     @default(false)
+
+  @@map("news")
+}
+
+model ContentBlock {
+  id        String   @id @default(cuid())
+  type      BlockType // TEXT, IMAGE, LINK
+  contentUz String?
+  contentEn String?
+  contentRu String?
+  images    String[] // Cloudinary URL lar massivi
+  linkUrl   String?
+  linkTitle String?
+  order     Int      // Blok tartibi
+  newsId    String
+  news      News     @relation(fields: [newsId], references: [id], onDelete: Cascade)
+
+  @@map("content_blocks")
+}
+
+enum BlockType {
+  TEXT
+  IMAGE
+  LINK
+}

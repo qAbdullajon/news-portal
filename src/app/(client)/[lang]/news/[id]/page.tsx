@@ -1,121 +1,175 @@
-// src/app/[lang]/news/[id]/page.tsx
 'use client';
 
 import { useLanguage } from '@/contexts/LanguageContext';
 import NewsImage from '@/components/NewsImage';
 import Link from 'next/link';
-import { use, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
-import Image from 'next/image';
+import { useParams } from 'next/navigation';
 
-// Mock ma'lumotlar - keyin API dan olasiz
-const mockNews = {
-    id: "1",
-    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3",
-    title: "Yangi Teknologiyalar Dunyosida So'nggi Yangiliklar",
-    titleRu: "Последние новости в мире новых технологий",
-    titleEn: "Latest News in the World of New Technologies",
-    description: "Sun'iy intellekt va ma'lumotlar tahlili sohasidagi so'nggi yutuqlar haqida to'liq ma'lumot.",
-    descriptionRu: "Полная информация о последних достижениях в области искусственного интеллекта и анализа данных.",
-    descriptionEn: "Complete information about the latest achievements in artificial intelligence and data analysis.",
-    content: `
-    <p>Sun'iy intellext (AI) sohasi so'nggi yillarda juda tez rivojlanmoqda. Dunyoning yetakchi texnologik kompaniyalari AI tadqiqotlariga milliardlab dollar sarmoya kiritmoqdalar.</p>
-    
-    <p>Machine learning algoritmlari endi faqatgina ilmiy tadqiqotlar darajasida emas, balki kundalik hayotimizning turli sohalarida qo'llanilmoqda. Bu esa dunyoni butunlay o'zgartiradi.</p>
-    
-    <h2>AI ning Kelajagi</h2>
-    <p>Mutaxassislarning fikricha, sun'iy intellekt keyingi 10 yil ichida insoniyatning barcha sohalariga ta'sir ko'rsatadi. Sog'liqni saqlash, ta'lim, transport va boshqa ko'plab sohalarda AI texnologiyalari inqilob qilmoqda.</p>
-  `,
-    contentRu: `
-    <p>Область искусственного интеллекта (ИИ) в последние годы очень быстро развивается. Ведущие технологические компании мира инвестируют миллиарды долларов в исследования ИИ.</p>
-    
-    <p>Алгоритмы машинного обучения теперь применяются не только на уровне научных исследований, но и в различных сферах нашей повседневной жизни. Это полностью меняет мир.</p>
-  `,
-    contentEn: `
-    <p>The field of artificial intelligence (AI) has been developing very rapidly in recent years. The world's leading technology companies are investing billions of dollars in AI research.</p>
-    
-    <p>Machine learning algorithms are now being applied not only at the level of scientific research, but also in various areas of our daily lives. This is completely changing the world.</p>
-  `,
-    created_at: "2024-01-15T10:30:00Z",
-    category: "Texnologiya",
-    categoryRu: "Технология",
-    categoryEn: "Technology",
-    author: "Ali Ahmedov",
-    tags: ["AI", "Texnologiya", "Innovatsiya"],
-    link_url: 'https://youtube.com',
-    imagesBlock: [
-        "https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?ixlib=rb-4.0.3",
-        "https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?ixlib=rb-4.0.3",
-        "https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?ixlib=rb-4.0.3",
-    ],
-    link_title: "Youtube",
-    relatedNews: [
-        {
-            id: "2",
-            image: "https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?ixlib=rb-4.0.3",
-            title: "Sport Olamidagi Eng So'nggi Voqealar",
-            created_at: "2024-01-14",
+// Yangilik ma'lumotlari interfeysi
+interface NewsContentBlock {
+    id: string;
+    type: string;
+    contentUz: string;
+    contentRu: string;
+    contentEn: string;
+    images: string[];
+    linkTitle: string | null;
+    linkUrl: string;
+    order: number;
+    newsId: string;
+}
 
-        },
-        {
-            id: "3",
-            image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3",
-            title: "Tabiat va Atrof-muhit Muhofazasi",
-            created_at: "2024-01-13",
-        }
-    ]
-};
+interface NewsData {
+    id: string;
+    slug: string;
+    titleUz: string;
+    titleRu: string;
+    titleEn: string;
+    descriptionUz: string;
+    descriptionRu: string;
+    descriptionEn: string;
+    content: NewsContentBlock[];
+    image: string;
+    published: boolean;
+    sendUrl: string;
+    createdAt: string;
+    updatedAt: string;
+}
 
-export default function NewsDetailPage({ params }: { params: Promise<{ lang: string; id: string }> }) {
-    const { lang, id } = use(params);
+export default function NewsDetailPage() {
     const { language } = useLanguage();
+    const [newsData, setNewsData] = useState<NewsData | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const params = useParams();
+    const lang = params.lang as string;
+    const id = params.id as string;
+
+    // Backenddan yangilik ma'lumotlarini olish
+    useEffect(() => {
+        const fetchNewsData = async () => {
+            try {
+                setLoading(true);
+                const response = await fetch(`/api/news/${id}`);
+
+                if (!response.ok) {
+                    throw new Error('Yangilik ma\'lumotlarini yuklab bo‘lmadi');
+                }
+
+                const data = await response.json();
+                setNewsData(data);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Xatolik yuz berdi');
+                console.error('Ma\'lumotlarni yuklashda xatolik:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (id) {
+            fetchNewsData();
+        }
+    }, [id]);
 
     // Tilga qarab ma'lumotlarni olish
     const getLocalizedData = () => {
+        if (!newsData) return null;
+
         switch (language) {
             case 'ru':
                 return {
-                    title: mockNews.titleRu,
-                    description: mockNews.descriptionRu,
-                    content: mockNews.contentRu,
-                    category: mockNews.categoryRu,
+                    title: newsData.titleRu,
+                    description: newsData.descriptionRu,
+                    category: "Новости",
                     readMore: "Читать далее",
                     relatedNews: "Похожие новости",
                     backToNews: "Назад к новостям",
-                    linkUrl: mockNews.link_url,
-                    linkTitle: mockNews.link_title,
-                    imagesBlock: mockNews.imagesBlock
                 };
             case 'en':
                 return {
-                    title: mockNews.titleEn,
-                    description: mockNews.descriptionEn,
-                    content: mockNews.contentEn,
-                    category: mockNews.categoryEn,
+                    title: newsData.titleEn,
+                    description: newsData.descriptionEn,
+                    category: "News",
                     readMore: "Read more",
                     relatedNews: "Related news",
                     backToNews: "Back to news",
-                    linkUrl: mockNews.link_url,
-                    linkTitle: mockNews.link_title,
-                    imagesBlock: mockNews.imagesBlock
                 };
             default:
                 return {
-                    title: mockNews.title,
-                    description: mockNews.description,
-                    content: mockNews.content,
-                    category: mockNews.category,
+                    title: newsData.titleUz,
+                    description: newsData.descriptionUz,
+                    category: "Yangiliklar",
                     readMore: "Ko'proq o'qish",
                     relatedNews: "Tegishli yangiliklar",
                     backToNews: "Yangiliklarga qaytish",
-                    linkUrl: mockNews.link_url,
-                    linkTitle: mockNews.link_title,
-                    imagesBlock: mockNews.imagesBlock
                 };
         }
     };
 
+    // Kontent bloklarini tilga qarab olish
+    const getLocalizedContent = (block: NewsContentBlock) => {
+        switch (language) {
+            case 'ru':
+                return {
+                    content: block.contentRu,
+                    linkTitle: block.linkTitle || "Ссылка"
+                };
+            case 'en':
+                return {
+                    content: block.contentEn,
+                    linkTitle: block.linkTitle || "Link"
+                };
+            default:
+                return {
+                    content: block.contentUz,
+                    linkTitle: block.linkTitle || "Havola"
+                };
+        }
+    };
+
+    // Kontent bloklarini tartib bo'yicha saralash
+    const sortedContentBlocks = newsData?.content
+        ? [...newsData.content].sort((a, b) => a.order - b.order)
+        : [];
+
+    if (loading) {
+        return (
+            <div>
+                <Navbar />
+                <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                        <p className="mt-4 text-gray-600">Yuklanmoqda...</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (error || !newsData) {
+        return (
+            <div>
+                <Navbar />
+                <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                    <div className="text-center">
+                        <h2 className="text-2xl font-bold text-red-600">Xatolik</h2>
+                        <p className="mt-2 text-gray-600">{error || "Yangilik topilmadi"}</p>
+                        <Link
+                            href={`/${lang}`}
+                            className="mt-4 inline-block bg-black text-white px-4 py-2 rounded-md hover:bg-black/90 transition-colors"
+                        >
+                            Yangiliklar ro'yxatiga qaytish
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     const localized = getLocalizedData();
+    if (!localized) return null;
 
     return (
         <div>
@@ -128,13 +182,13 @@ export default function NewsDetailPage({ params }: { params: Promise<{ lang: str
                         {/* Rasm bloki */}
                         <div className="relative h-64 md:h-96 w-full">
                             <NewsImage
-                                src={mockNews.image}
+                                src={newsData.image}
                                 alt={localized.title}
                                 fill
                                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 60vw"
                                 className="object-cover"
                             />
-                            <div className="absolute top-4 left-4 bg-black text-white px-3 py-1 rounded-full text-sm font-medium">
+                            <div className="absolute top-4 left-4 bg-black bg-opacity-70 text-white px-3 py-1 rounded-full text-sm font-medium">
                                 {localized.category}
                             </div>
                         </div>
@@ -143,9 +197,19 @@ export default function NewsDetailPage({ params }: { params: Promise<{ lang: str
                         <div className="p-6">
                             <div className="flex items-center justify-between mb-4">
                                 <span className="text-sm text-gray-500">
-                                    {new Date(mockNews.created_at).toLocaleDateString(language)}
+                                    {new Date(newsData.createdAt).toLocaleDateString(language, {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                    })}
                                 </span>
-                                <span className="text-sm text-gray-500">{mockNews.author}</span>
+                                <span className="text-sm text-gray-500">
+                                    {new Date(newsData.updatedAt).toLocaleDateString(language, {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                    })}
+                                </span>
                             </div>
 
                             <h1 className="text-3xl font-bold text-gray-800 mb-4">
@@ -155,61 +219,74 @@ export default function NewsDetailPage({ params }: { params: Promise<{ lang: str
                             <p className="text-lg text-gray-600 mb-6">
                                 {localized.description}
                             </p>
-
-                            {/* Teglar */}
-                            <div className="flex flex-wrap gap-2 mb-6">
-                                {mockNews.tags.map((tag, index) => (
-                                    <span
-                                        key={index}
-                                        className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm"
-                                    >
-                                        #{tag}
-                                    </span>
-                                ))}
-                            </div>
                         </div>
 
-                        {/* Matn bloki */}
-                        <div className="px-6 pb-6">
-                            <div
-                                className="prose prose-lg max-w-none"
-                                dangerouslySetInnerHTML={{ __html: localized.content }}
-                            />
-                        </div>
+                        {/* Kontent bloklari */}
+                        <div className="px-6 pb-6 space-y-6">
+                            {sortedContentBlocks.map((block) => {
+                                const localizedBlock = getLocalizedContent(block);
 
-                        {/* Images blocki */}
-                        {localized.imagesBlock && localized.imagesBlock.length > 0 && (
-                            <div className="px-6 pb-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                                    {localized.imagesBlock.map((url, i) => (
-                                        <div key={i} className="relative h-64 md:h-80 w-full">
-                                            <NewsImage
-                                                src={url}
-                                                alt={`News image ${i + 1}`}
-                                                fill
-                                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                                                className="object-cover rounded-lg"
-                                            />
+                                if (block.type === 'TEXT' && localizedBlock.content) {
+                                    return (
+                                        <div
+                                            key={block.id}
+                                            className="prose prose-lg max-w-none"
+                                            dangerouslySetInnerHTML={{ __html: localizedBlock.content }}
+                                        />
+                                    );
+                                }
+
+                                if (block.type === 'IMAGE' && block.images.length > 0) {
+                                    return (
+                                        <div key={block.id} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {block.images.map((imageUrl, index) => (
+                                                <div key={index} className="relative h-64 md:h-80 w-full">
+                                                    <NewsImage
+                                                        src={imageUrl}
+                                                        alt={`${localized.title} - ${index + 1}`}
+                                                        fill
+                                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                                        className="object-cover rounded-lg"
+                                                    />
+                                                </div>
+                                            ))}
                                         </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+                                    );
+                                }
 
-                        <div className="mt-8 pt-6 border-t border-gray-200 bg-gray-50 rounded-lg p-6">
-                            <h3 className="text-lg font-semibold text-gray-800 mb-4">Batafsil ma'lumot olish uchun</h3>
+                                if (block.type === 'LINK' && block.linkUrl) {
+                                    return (
+                                        <div key={block.id} className="mt-8 pt-6 border-t border-gray-200 bg-gray-50 rounded-lg p-6">
+                                            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                                                {localized.readMore}
+                                            </h3>
+                                            <Link
+                                                href={block.linkUrl}
+                                                className="block text-blue-600 hover:text-blue-800 font-medium text-lg transition-colors duration-200"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                            >
+                                                {localizedBlock.linkTitle}
+                                            </Link>
+                                        </div>
+                                    );
+                                }
 
-                            <div className="space-y-4">
-                                {/* Sarlavha havolasi */}
-                                <Link
-                                    href={localized.linkUrl}
-                                    className="block text-blue-600 hover:text-blue-800 font-medium text-lg transition-colors duration-200"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    {localized.linkTitle}
-                                </Link>
-                            </div>
+                                return null;
+                            })}
+                        </div>
+
+                        {/* Orqaga qaytish tugmasi */}
+                        <div className="px-6 pb-6">
+                            <Link
+                                href={`/${lang}`}
+                                className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
+                            >
+                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                </svg>
+                                {localized.backToNews}
+                            </Link>
                         </div>
                     </article>
                 </div>

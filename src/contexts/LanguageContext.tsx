@@ -1,19 +1,20 @@
-// src/contexts/LanguageContext.tsx
 'use client';
 
+import { Language } from '@/types/type';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-
-type Language = 'uz' | 'ru' | 'en';
 
 interface NewsContextType {
     language: Language;
     setLanguage: (lang: Language) => void;
+    adminHeaderTitle: string;
+    setAdminHeaderTitle: (text: string) => void
 }
 
 const NewsContext = createContext<NewsContextType | undefined>(undefined);
 
 export function NewsPortalProvider({ children }: { children: React.ReactNode }) {
     const [language, setLanguage] = useState<Language | undefined>(undefined);
+    const [adminHeaderTitle, setAdminHeaderTitle] = useState("Barcha yangiliklar")
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -40,6 +41,8 @@ export function NewsPortalProvider({ children }: { children: React.ReactNode }) 
     const value = {
         language: language as Language,
         setLanguage: (lang: Language) => setLanguage(lang),
+        adminHeaderTitle,
+        setAdminHeaderTitle
     };
 
     if (!language) return null; // yoki loading
