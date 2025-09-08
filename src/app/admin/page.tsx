@@ -69,8 +69,8 @@ const NewsPageAdmin = () => {
         router.push(`/admin/edit/${item.id}`)
     }
 
-    const handleView = (id: string) => {
-        router.push(`/news/${id}`)
+    const handleView = (slug: any) => {
+        router.push(`/news/${slug}`)
     }
 
     if (loading) {
@@ -112,7 +112,7 @@ const NewsPageAdmin = () => {
                             <p className='text-xs text-gray-500 pt-2'>{item.createdAt ? format(new Date(item.createdAt), "yyyy-MM-dd") : "Noma'lum sana"}</p>
                         </div>
                         <div className='flex items-center gap-3'>
-                            <button onClick={() => handleView(item.id)} className='w-10 h-10 flex items-center justify-center hover:bg-gray-200 rounded-xl'>
+                            <button onClick={() => handleView(item.slug)} className='w-10 h-10 flex items-center justify-center hover:bg-gray-200 rounded-xl'>
                                 <Eye size={18} />
                             </button>
                             <button onClick={() => handleEdit(item)} className='w-10 h-10 flex items-center justify-center hover:bg-gray-200 rounded-xl'>
