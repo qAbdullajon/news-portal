@@ -353,40 +353,35 @@ const EditNews = () => {
 
         setIsLoading(true);
         try {
-            // 1. Yangi yuklangan rasmlarni Cloudinary ga yuklash
-            const uploadPromises: Promise<void>[] = [];
-            const blocksWithUploadedImages = [...blocks];
-            const uploadedImages: { blockIndex: number, imageIndex: number, url: string }[] = [];
-
-
-            for (let i = 0; i < blocksWithUploadedImages.length; i++) {
-                const block = blocksWithUploadedImages[i];
-                if (block.type === "image") {
-                    for (let j = 0; j < block.images.length; j++) {
-                        const image = block.images[j];
-                        if (image.preview.startsWith("blob:")) {
-                            uploadPromises.push(
-                                uploadImageToCloudinary(image.file)
-                                    .then((cloudinaryUrl) => {
-                                        uploadedImages.push({ blockIndex: i, imageIndex: j, url: cloudinaryUrl });
-                                    })
-                                    .catch((error) => {
+            // 1. Yangi yuklangan rasmlarni Cloudinary ga yuklash va massivni yangilash
+            const blocksWithUploadedImages = await Promise.all(
+                blocks.map(async (block) => {
+                    if (block.type === "image") {
+                        const newImages = await Promise.all(
+                            block.images.map(async (img) => {
+                                if (img.preview.startsWith("blob:")) {
+                                    try {
+                                        const url = await uploadImageToCloudinary(img.file);
+                                        return { ...img, preview: url };
+                                    } catch (error: any) {
                                         console.error("Rasm yuklashda xatolik:", error);
                                         toast.error(`Rasm yuklashda xatolik: ${error.message}`);
-                                    })
-                            );
-                        }
+                                        return img;
+                                    }
+                                }
+                                return img;
+                            })
+                        );
+                        return { ...block, images: newImages };
                     }
-                }
-            }
+                    return block;
+                })
+            );
 
-            // 2. Barcha rasmlar yuklanishini kutish
-            await Promise.all(uploadPromises);
-
-            // 3. Yangilangan bloklarni saqlash
+            // 2. Yangilangan bloklarni state ga o'rnatish
             setBlocks(blocksWithUploadedImages);
 
-            // 4. Content bloklarini formatlash
+            // 3. Content bloklarini formatlash
             const formattedBlocks = blocksWithUploadedImages.map((block, index) => {
                 const baseBlock = {
                     type: block.type,
@@ -421,7 +416,7 @@ const EditNews = () => {
                 return baseBlock;
             });
 
-            // 5. Ma'lumotlarni serverga yuborish
+            // 4. Ma'lumotlarni serverga yuborish
             const requestBody = {
                 slug: currentNew.slug,
                 image: currentNew.image,
@@ -447,10 +442,7 @@ const EditNews = () => {
             if (response.ok) {
                 const result = await response.json();
                 toast.success("Yangilik muvaffaqiyatli saqlandi");
-
-                // Yangilangan ma'lumotlarni state ga o'rnatish
                 setCurrentNew(result);
-
             } else {
                 const errorData = await response.json();
                 console.error("Server error:", errorData);

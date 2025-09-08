@@ -59,6 +59,8 @@ export default function NewsDetailPage() {
                 }
 
                 const data = await response.json();
+                console.log(data);
+
                 setNewsData(data);
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Xatolik yuz berdi');
