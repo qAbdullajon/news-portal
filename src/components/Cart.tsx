@@ -77,7 +77,7 @@ const Cart = ({ cart, priority = false }: CartProps) => {
             {/* Kontent qismi */}
             <div className="p-4 flex flex-col flex-grow">
                 <span className="text-xs text-gray-500 font-medium">
-                    {cart.createdAt ? format(new Date(cart.createdAt), 'yyyy-MM-dd') : "Sana yo'q"}
+                    {cart.createdAt ? format(new Date(cart.createdAt), 'yyyy-MM-dd') : "Sana yo'qgit "}
                 </span>
 
                 <h3 className="font-semibold text-lg mb-2 line-clamp-2">
