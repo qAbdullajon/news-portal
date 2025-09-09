@@ -1,4 +1,3 @@
-// src/components/NewsImage.tsx
 'use client';
 
 import Image from 'next/image';
@@ -9,7 +8,7 @@ interface NewsImageProps {
     alt: string;
     fill?: boolean;
     className?: string;
-    sizes?: string
+    sizes?: string;
 }
 
 const NewsImage: React.FC<NewsImageProps> = ({
@@ -17,36 +16,40 @@ const NewsImage: React.FC<NewsImageProps> = ({
     alt,
     fill = false,
     className = '',
-    sizes = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw' // ✅ Default sizes
-
+    sizes = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
 }) => {
     const [isLoading, setIsLoading] = useState(true);
+    const [hasError, setHasError] = useState(false);
+
+    // Agar rasm yuklanmagan bo'lsa, muqova ko'rsatish
+    if (hasError) {
+        return (
+            <div className={`bg-gray-200 flex items-center justify-center ${className}`}>
+                <span className="text-gray-500">Rasm yuklanmadi</span>
+            </div>
+        );
+    }
 
     return (
         <>
             {fill ? (
-                <img src={src} alt=""
+                // Fill rejimida ham Image komponentidan foydalanish
+                <Image
+                    src={src}
+                    alt={alt}
+                    fill
+                    priority={true}
                     className={`object-cover duration-700 ease-in-out group-hover:opacity-90 ${isLoading
-                        ? 'scale-110 blur-2xl grayscale'
-                        : 'scale-100 blur-0 grayscale-0'
+                            ? 'scale-110 blur-2xl grayscale'
+                            : 'scale-100 blur-0 grayscale-0'
                         } ${className}`}
                     sizes={sizes}
                     onLoad={() => setIsLoading(false)}
-                    onError={() => setIsLoading(false)}
+                    onError={() => {
+                        setIsLoading(false);
+                        setHasError(true);
+                    }}
                 />
-                // <Image
-                //     src={src}
-                //     alt={alt}
-                //     fill
-                //     priority={true}
-                //     className={`object-cover duration-700 ease-in-out group-hover:opacity-90 ${isLoading
-                //         ? 'scale-110 blur-2xl grayscale'
-                //         : 'scale-100 blur-0 grayscale-0'
-                //         } ${className}`}
-                //     sizes={sizes}
-                //     onLoad={() => setIsLoading(false)}
-                //     onError={() => setIsLoading(false)}
-                // />
             ) : (
                 <Image
                     src={src}
@@ -55,11 +58,14 @@ const NewsImage: React.FC<NewsImageProps> = ({
                     height={250}
                     priority={true}
                     className={`object-cover duration-700 ease-in-out group-hover:opacity-90 ${isLoading
-                        ? 'scale-110 blur-2xl grayscale'
-                        : 'scale-100 blur-0 grayscale-0'
+                            ? 'scale-110 blur-2xl grayscale'
+                            : 'scale-100 blur-0 grayscale-0'
                         } ${className}`}
                     onLoad={() => setIsLoading(false)}
-                    onError={() => setIsLoading(false)}
+                    onError={() => {
+                        setIsLoading(false);
+                        setHasError(true);
+                    }}
                 />
             )}
         </>
