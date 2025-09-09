@@ -7,12 +7,15 @@ interface NewsContextType {
     language: Language;
     setLanguage: (lang: Language) => void;
     adminHeaderTitle: string;
-    setAdminHeaderTitle: (text: string) => void
+    setAdminHeaderTitle: (text: string) => void;
+    isAuth: boolean;
+    setIsAuth: (bool: boolean) => void
 }
 
 const NewsContext = createContext<NewsContextType | undefined>(undefined);
 
 export function NewsPortalProvider({ children }: { children: React.ReactNode }) {
+    const [isAuth, setIsAuth] = useState(false)
     const [language, setLanguage] = useState<Language | undefined>(undefined);
     const [adminHeaderTitle, setAdminHeaderTitle] = useState("Barcha yangiliklar")
 
@@ -42,7 +45,9 @@ export function NewsPortalProvider({ children }: { children: React.ReactNode }) 
         language: language as Language,
         setLanguage: (lang: Language) => setLanguage(lang),
         adminHeaderTitle,
-        setAdminHeaderTitle
+        setAdminHeaderTitle,
+        isAuth,
+        setIsAuth
     };
 
     if (!language) return null; // yoki loading

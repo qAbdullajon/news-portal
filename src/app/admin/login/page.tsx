@@ -9,6 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 
 const formSchema = z.object({
     email: z.string().email(),
@@ -20,6 +22,7 @@ const formSchema = z.object({
 
 const AdminLoginPage = () => {
     const router = useRouter()
+    const [loading, setLoading] = React.useState(false)
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -30,14 +33,36 @@ const AdminLoginPage = () => {
     })
 
     // 2. Define a submit handler.
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values)
-        router.push('/admin')
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(values),
+            })
+
+            const data = await response.json()
+            if (response.ok) {
+                router.push('/admin')
+                router.refresh()
+            } else {
+                toast.error(data.error || 'Login failed')
+            }
+        } catch (error) {
+            toast.error('An error occurred. Please try again.')
+        } finally {
+            setLoading(false)
+        }
+
     }
 
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-gray-100 px-4">
+            <Toaster />
+
             <Card className="w-full max-w-sm shadow-lg">
                 <CardHeader>
                     <CardTitle className="text-center">Admin Login</CardTitle>
@@ -71,7 +96,9 @@ const AdminLoginPage = () => {
                                     </FormItem>
                                 )}
                             />
-                            <Button type="submit">Submit</Button>
+                            <Button disabled={loading}
+                                type="submit">{loading ? 'Signing in...' : 'Sign in'}
+                            </Button>
                         </form>
                     </Form>
                 </CardContent>
