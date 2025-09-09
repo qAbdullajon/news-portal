@@ -746,7 +746,6 @@ const EditNews = () => {
 
             <div className='flex justify-end'>
                 <div className='flex items-center gap-4'>
-                    <span className={`text-xs ${currentNew.published ? 'bg-black' : 'bg-amber-700'} text-white py-1 px-3 rounded-sm`}>{currentNew.published ? 'Nashr qilingan' : 'Nashr qilinmagan'}</span>
                     <Button
                         onClick={handleSave}
                         className='flex items-center gap-2'
