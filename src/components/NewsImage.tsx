@@ -25,11 +25,7 @@ const NewsImage: React.FC<NewsImageProps> = ({
     return (
         <>
             {fill ? (
-                <Image
-                    src={src}
-                    alt={alt}
-                    fill
-                    priority={true}
+                <img src={src} alt=""
                     className={`object-cover duration-700 ease-in-out group-hover:opacity-90 ${isLoading
                         ? 'scale-110 blur-2xl grayscale'
                         : 'scale-100 blur-0 grayscale-0'
@@ -38,6 +34,19 @@ const NewsImage: React.FC<NewsImageProps> = ({
                     onLoad={() => setIsLoading(false)}
                     onError={() => setIsLoading(false)}
                 />
+                // <Image
+                //     src={src}
+                //     alt={alt}
+                //     fill
+                //     priority={true}
+                //     className={`object-cover duration-700 ease-in-out group-hover:opacity-90 ${isLoading
+                //         ? 'scale-110 blur-2xl grayscale'
+                //         : 'scale-100 blur-0 grayscale-0'
+                //         } ${className}`}
+                //     sizes={sizes}
+                //     onLoad={() => setIsLoading(false)}
+                //     onError={() => setIsLoading(false)}
+                // />
             ) : (
                 <Image
                     src={src}
