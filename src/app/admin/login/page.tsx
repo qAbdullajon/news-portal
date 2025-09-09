@@ -27,8 +27,8 @@ const AdminLoginPage = () => {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            email: "",
-            password: ""
+            email: "admin@gmail.com",
+            password: "pass"
         },
     })
 
