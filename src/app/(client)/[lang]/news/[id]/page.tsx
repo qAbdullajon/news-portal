@@ -187,7 +187,6 @@ export default function NewsDetailPage() {
                                 src={newsData.image}
                                 alt={localized.title}
                                 fill
-                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 60vw"
                                 className="object-cover"
                             />
                             <div className="absolute top-4 left-4 bg-black bg-opacity-70 text-white px-3 py-1 rounded-full text-sm font-medium">
@@ -247,7 +246,6 @@ export default function NewsDetailPage() {
                                                         src={imageUrl}
                                                         alt={`${localized.title} - ${index + 1}`}
                                                         fill
-                                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                                         className="object-cover rounded-lg"
                                                     />
                                                 </div>
